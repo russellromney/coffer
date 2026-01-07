@@ -52,12 +52,18 @@ Compare to Infisical at $18/user/month: 50 users = $900/month vs our $50/month.
 | Component | Technology | Why |
 |-----------|------------|-----|
 | Frontend | SvelteKit | Fast, minimal, good DX |
-| API | Rust (Axum) | Performance, security, reuse crypto code |
+| API | **Go (Chi/Echo)** | Reuse crypto/store code from CLI, same language |
 | Auth | Clerk | Easy team/org management, OAuth |
 | Database | Turso | SQLite at the edge, familiar schema |
 | Storage | Tigris S3 | Backup storage, cheap |
-| Hosting | Fly.io | Already using it, good for Rust |
+| Hosting | Fly.io | Already using it, great for Go |
 | Payments | Stripe | Standard, handles metered billing |
+
+**Why Go over Rust/TypeScript:**
+- The CLI is already Go - crypto, store, models all written
+- Copy `internal/crypto` and `internal/store` packages directly
+- Same encryption implementation = guaranteed compatibility
+- Faster iteration than Rust, better crypto than Node
 
 ## Database Schema (Turso)
 
@@ -322,21 +328,23 @@ coffer-saas/
 │   ├── package.json
 │   └── svelte.config.js
 │
-├── backend/                  # Rust API
-│   ├── src/
-│   │   ├── main.rs
-│   │   ├── routes/
-│   │   │   ├── mod.rs
-│   │   │   ├── auth.rs
-│   │   │   ├── orgs.rs
-│   │   │   ├── projects.rs
-│   │   │   ├── envs.rs
-│   │   │   ├── secrets.rs
-│   │   │   └── billing.rs
-│   │   ├── models/
-│   │   ├── crypto/           # Port from Go or use rust-crypto
-│   │   └── db/
-│   ├── Cargo.toml
+├── backend/                  # Go API (reuses CLI code)
+│   ├── cmd/
+│   │   └── server/
+│   │       └── main.go
+│   ├── internal/
+│   │   ├── api/
+│   │   │   ├── routes.go
+│   │   │   ├── auth.go
+│   │   │   ├── orgs.go
+│   │   │   ├── projects.go
+│   │   │   ├── envs.go
+│   │   │   ├── secrets.go
+│   │   │   └── billing.go
+│   │   ├── crypto/           # Copy from CLI
+│   │   ├── store/            # Copy from CLI (add multi-tenant)
+│   │   └── models/           # Copy from CLI (add org fields)
+│   ├── go.mod
 │   └── fly.toml
 │
 ├── cli/                      # Cloud commands (add to existing coffer)
@@ -352,7 +360,7 @@ Not providing time estimates - here's the work broken down:
 
 **Phase 1: Foundation**
 - Set up SvelteKit frontend with Clerk
-- Set up Rust backend with Turso
+- Set up Go backend with Turso (copy crypto/store from CLI)
 - Basic org/project/env CRUD
 - Secrets CRUD with encryption
 
