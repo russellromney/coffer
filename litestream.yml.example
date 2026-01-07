@@ -1,0 +1,34 @@
+# Litestream configuration for backing up coffer vault to Tigris S3
+#
+# To use:
+# 1. Install litestream: https://litestream.io/install/
+# 2. Copy this file to litestream.yml and fill in your credentials
+# 3. Run: litestream replicate -config litestream.yml
+#
+# For automatic startup, see: https://litestream.io/guides/systemd/
+
+dbs:
+  - path: ~/.coffer/vault.db
+    replicas:
+      - type: s3
+        bucket: your-bucket-name
+        path: coffer/vault
+        endpoint: https://fly.storage.tigris.dev
+        region: auto
+        access-key-id: ${AWS_ACCESS_KEY_ID}
+        secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+
+        # Sync every 60 seconds
+        sync-interval: 60s
+
+        # Create a snapshot every hour
+        snapshot-interval: 1h
+
+        # Keep snapshots for 7 days
+        retention: 168h
+
+        # Retention check interval
+        retention-check-interval: 1h
+
+# To restore from backup:
+# litestream restore -config litestream.yml ~/.coffer/vault.db

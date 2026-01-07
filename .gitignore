@@ -1,0 +1,23 @@
+# Binary
+coffer
+coffer.exe
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+*.test
+coverage.out
+
+# Local vault (never commit)
+vault.db
+vault.db-wal
+vault.db-shm
+session
